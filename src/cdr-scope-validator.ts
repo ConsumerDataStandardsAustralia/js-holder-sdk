@@ -11,7 +11,7 @@ export function cdrScopeValidator(userService: IUserService): any {
         let errorList: ResponseErrorListV2 = {
             errors: []
         }
-        let user = userService.getUser();
+        let user = userService.getUser(req);
         if (scopeForRequestIsValid(req, user?.scopes_supported) == false) {
             console.log("cdrScopeValidator: scopes for request are invalid.");
             errorList.errors.push({code: 'urn:au-cds:error:cds-all:Authorisation/InvalidConsent', title: 'InvalidConsent', detail: 'Invalid scope'})
