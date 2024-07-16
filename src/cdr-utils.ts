@@ -18,7 +18,7 @@ export function getEndpoint(req: Request, options: CdrConfig | undefined): DsbEn
         let dsbEndpoints: DsbEndpoint[] = [];
         options.endpoints.forEach(e => {
             let dsbEp = defaultEndpoints.find(x => x.requestPath == e.requestPath && x.requestType == e.requestType) as DsbEndpoint;
-            dsbEndpoints.push(dsbEp)
+            if (dsbEp) dsbEndpoints.push(dsbEp)
         })
         endpoints = dsbEndpoints;
     }

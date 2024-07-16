@@ -1,5 +1,6 @@
 import { CdrUser } from "./user"
+import { Request } from 'express';
 
 export interface IUserService {   
-    getUser(): CdrUser | undefined;
+    getUser(req?: Request): CdrUser | undefined;
 }

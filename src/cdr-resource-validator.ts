@@ -12,7 +12,7 @@ export function cdrResourceValidator(userService: IUserService): any {
             let errorList: ResponseErrorListV2 = {
                 errors: []
             }
-            let user = userService.getUser();
+            let user = userService.getUser(req);
             let ep = getEndpoint(req, undefined);
             if (ep == null) {
                 console.log("cdrResourceValidator: No endpoint found. Nothing to evaluate");  
