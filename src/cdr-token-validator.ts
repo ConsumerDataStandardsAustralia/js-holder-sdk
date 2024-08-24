@@ -1,6 +1,6 @@
 
 import { Request, Response, NextFunction } from 'express';
-import { getEndpoint } from './cdr-utils';
+import { buildErrorMessage, getEndpoint } from './cdr-utils';
 import { ResponseErrorListV2 } from 'consumer-data-standards/common';
 import { DsbRequest } from './models/dsb-request';
 import { DsbResponse } from './models/dsb-response';
@@ -9,6 +9,7 @@ import { DsbEndpoint } from './models/dsb-endpoint-entity';
 import energyEndpoints from './data/cdr-energy-endpoints.json';
 import bankingEndpoints from './data/cdr-banking-endpoints.json';
 import commonEndpoints from './data/cdr-common-endpoints.json';
+import { DsbStandardError } from './error-messsage-defintions';
 
 const defaultEndpoints = [...energyEndpoints, ...bankingEndpoints, ...commonEndpoints] as any[];
 
@@ -46,7 +47,7 @@ export function cdrTokenValidator(config: CdrConfig | undefined): any {
             // If there is no scopes property on the request object, go the next()
             if (req?.scopes == undefined) {
                 console.log("cdrTokenValidator: No scopes found.");
-                errorList.errors.push({code: 'urn:au-cds:error:cds-all:Authorisation/InvalidConsent', title: 'InvalidConsent', detail: 'Invalid scope'})
+                errorList = buildErrorMessage(DsbStandardError.CONSENT_INVALID,'Invalid scope',errorList)
                 res.status(403).json(errorList);
                 return;   
             }
@@ -57,7 +58,7 @@ export function cdrTokenValidator(config: CdrConfig | undefined): any {
             // read the scope and compare to the scope required
             if (availableScopes == undefined || availableScopes?.indexOf(ep.authScopesRequired) == -1) {
                 console.log("cdrTokenValidator: Required scopes not found.");
-                errorList.errors.push({code: 'urn:au-cds:error:cds-all:Authorisation/InvalidConsent', title: 'InvalidConsent', detail: 'Invalid scope'})
+                errorList = buildErrorMessage(DsbStandardError.CONSENT_INVALID,'Invalid scope',errorList);
                 res.status(403).json(errorList);
                 return;         
             } 

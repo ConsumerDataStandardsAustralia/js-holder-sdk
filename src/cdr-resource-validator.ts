@@ -1,8 +1,9 @@
 
 import { Request, Response, NextFunction } from 'express';
-import { userHasAuthorisedForAccount, getEndpoint, scopeForRequestIsValid } from './cdr-utils';
+import { userHasAuthorisedForAccount, getEndpoint, scopeForRequestIsValid, buildErrorMessage } from './cdr-utils';
 import { IUserService } from './models/user-service.interface';
 import { ResponseErrorListV2 } from 'consumer-data-standards/common';
+import { DsbStandardError } from './error-messsage-defintions';
 
 
 export function cdrResourceValidator(userService: IUserService): any {
@@ -19,25 +20,24 @@ export function cdrResourceValidator(userService: IUserService): any {
                 next(); 
                 return;              
             };
-            var accountIds;
             // evaluate the request body
             if (req.method == 'POST') {
                 let reqBody: any = req?.body;
                 if (reqBody?.data == null) {
                     console.log("cdrResourceValidator: Invalid request body. Missing property: data");
-                    errorList.errors.push({ code: 'urn:au-cds:error:cds-all:Field/Missing', title: 'Missing required field', detail: 'data' });
+                    errorList = buildErrorMessage(DsbStandardError.MISSING_REQUIRED_FIELD, 'data' ,errorList);
                     res.status(400).json(errorList);
                     return;  
                 }
                 if (reqBody?.data?.accountIds == null && reqBody?.data.servicePointIds == null) {
-                    console.log("cdrResourceValidator: Invalid request body. Missing property: data.accountIds");
-                    errorList.errors.push({ code: 'urn:au-cds:error:cds-all:Field/Missing', title: 'Missing required field', detail: 'data.accountIds' });
+                    console.log("cdrResourceValidator: Invalid request body. Missing resource identifiers.");
+                    errorList = buildErrorMessage(DsbStandardError.MISSING_REQUIRED_FIELD, 'data' ,errorList);
                     res.status(400).json(errorList);
                     return;  
                 }
                 if (Array.isArray(reqBody?.data?.accountIds) == false && Array.isArray(reqBody?.data?.servicePointIds) == false) {
-                    console.log("cdrResourceValidator: Invalid request body. Account Ids must be an array");
-                    errorList.errors.push({ code: 'urn:au-cds:error:cds-all:Field/Invalid', title: 'Invalid field', detail: 'data.accountIds' });
+                    console.log("cdrResourceValidator: Invalid request body. resource identifiers must be an array");
+                    errorList = buildErrorMessage(DsbStandardError.INVALID_FIELD, 'data.accountIds' ,errorList);
                     res.status(400).json(errorList);
                     return;  
                 }    
@@ -45,7 +45,13 @@ export function cdrResourceValidator(userService: IUserService): any {
             // check the requested accountId or other url parameters specific to a logged in user
             if (userHasAuthorisedForAccount(req, user) == false) {
                 console.log("cdrResourceValidator: user not authorised, or required user not found");
-                errorList.errors.push({ code: 'urn:au-cds:error:cds-all:Resource/Invalid', title: 'Invalid Resource', detail: `${req.url}` });
+                // TODO get the account id for the error message
+                if (ep.requestPath.indexOf('/energy') >= 0) {
+                    errorList = buildErrorMessage(DsbStandardError.INVALID_ENERGY_ACCOUNT, 'data.accountIds' ,errorList);
+                }
+                if (ep.requestPath.indexOf('/banking') >= 0) {
+                    errorList = buildErrorMessage(DsbStandardError.INVALID_BANK_ACCOUNT, 'data.accountIds' ,errorList);
+                }
                 res.status(404).json(errorList);
                 return;                    
             } 

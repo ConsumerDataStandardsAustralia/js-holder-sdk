@@ -2,12 +2,13 @@ import { NextFunction, Request, Response } from 'express';
 import energyEndpoints from '../src/data/cdr-energy-endpoints.json';
 import bankingEndpoints from '../src/data/cdr-banking-endpoints.json'
 import { EndpointConfig } from '../src/models/endpoint-config';
-import { userHasAuthorisedForAccount, getEndpoint, scopeForRequestIsValid } from '../src/cdr-utils';
-import { ResponseErrorListV2 } from 'consumer-data-standards/common';
+import { userHasAuthorisedForAccount, getEndpoint, scopeForRequestIsValid, buildErrorMessage } from '../src/cdr-utils';
+import { MetaError, ResponseErrorListV2 } from 'consumer-data-standards/common';
 import { CdrUser } from '../src/models/user';
 import { DsbEndpoint } from '../src/models/dsb-endpoint-entity';
 import commonEndpoints from '../src/data/cdr-common-endpoints.json';
 import { CdrConfig } from '..';
+import { DsbStandardError } from '../src/error-messsage-defintions';
 
 describe('Utility functions', () => {
     let mockRequest: Partial<Request>;
@@ -683,4 +684,39 @@ describe('Utility functions', () => {
         let ep = getEndpoint(mockRequest as Request, config);
         expect(ep).toBeNull();
     });
+
+    test('Create standard error message - New list', async() => {
+        const errorDetail: string = "TrxId 123456";
+        const meta: MetaError = {
+            urn: "Additional data For Error"
+        }
+        let errorList: ResponseErrorListV2 = buildErrorMessage(DsbStandardError.MISSING_REQUIRED_FIELD, errorDetail, undefined, meta);
+
+        expect(errorList.errors.length).toBe(1); 
+        expect(errorList.errors[0].detail).toBe(errorDetail);
+        expect(errorList.errors[0].meta).toEqual(meta);
+        expect(errorList.errors[0].code).toBe("urn:au-cds:error:cds-all:Field/Missing")       
+    })
+
+    test('Create standard error message - Existing list', async() => {
+        const errorDetail: string = "TrxId 123456";
+        const meta: MetaError = {
+            urn: "Additional data For Error"
+        }
+        let errorList: ResponseErrorListV2 = {
+            errors: [
+                {
+                    title: "Invalid Service Point",
+                    code: "urn:au-cds:error:cds-energy:Authorisation/InvalidServicePoint",
+                    detail: "5468999111",
+                    meta: {
+                        urn: "Some urn"
+                    }
+                }
+            ]
+        }
+        errorList = buildErrorMessage(DsbStandardError.MISSING_REQUIRED_FIELD, errorDetail, errorList, meta);
+
+        expect(errorList.errors.length).toBe(2);      
+    }) 
 });

@@ -286,7 +286,7 @@ describe('Resource validation middleware', () => {
         let returnedErrors: ResponseErrorListV2 = {
             errors: [ {
                 code: 'urn:au-cds:error:cds-all:Field/Missing',
-                title: 'Missing required field',
+                title: 'Missing Required Field',
                 detail: 'data'
             }]
         };
@@ -313,8 +313,8 @@ describe('Resource validation middleware', () => {
         let returnedErrors: ResponseErrorListV2 = {
             errors: [ {
                 code: 'urn:au-cds:error:cds-all:Field/Missing',
-                title: 'Missing required field',
-                detail: 'data.accountIds'
+                title: 'Missing Required Field',
+                detail: 'data'
             }]
         };
         let auth = cdrResourceValidator(mockEnergyUserService);

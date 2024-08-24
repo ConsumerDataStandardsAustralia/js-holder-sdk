@@ -3,8 +3,12 @@ import { DsbEndpoint } from './models/dsb-endpoint-entity';
 import energyEndpoints from './data/cdr-energy-endpoints.json';
 import bankingEndpoints from './data/cdr-banking-endpoints.json';
 import commonEndpoints from './data/cdr-common-endpoints.json';
+import standardErrors from './data/cdr-standard-error-messages.json'
 import { CdrConfig } from './models/cdr-config';
 import { CdrUser } from './models/user';
+import { MetaError, ResponseErrorListV2 } from 'consumer-data-standards/common';
+import { DsbStandardError } from './error-messsage-defintions';
+import { CdrError } from './models/cdr-error';
 
 const defaultEndpoints = [...energyEndpoints, ...bankingEndpoints, ...commonEndpoints];
 
@@ -82,6 +86,34 @@ export function findXFapiRequired(req: Request): boolean {
     } catch(e) {
         return true;
     }
+}
+
+export function buildErrorMessage(errorMessageId: DsbStandardError, errorDetail: string, errorList?: ResponseErrorListV2 | undefined, metaData?: MetaError): ResponseErrorListV2 {
+    var retVal: ResponseErrorListV2;
+    // if a list is passed in then we will append this error, otherwise create new error list
+    if (errorList == null){
+        var retVal: ResponseErrorListV2 = {
+            errors: [
+            ]
+        }
+    }
+    else{
+        retVal = errorList;
+    }
+    let dsbError: any = standardErrors.find(x => x.errorMessageId == errorMessageId);
+
+    let error: any = {
+        code : dsbError?.errorCode,
+        title: dsbError?.errorTitle,
+    }
+    if (errorDetail != null) {
+        error.detail = errorDetail
+    }
+    if (metaData != null) {
+        error.meta = metaData
+    }
+    retVal.errors.push(error);
+    return retVal;
 }
 
 function arraysAreEqual(a: string[], b: string[]): boolean {
