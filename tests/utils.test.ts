@@ -2,13 +2,15 @@ import { NextFunction, Request, Response } from 'express';
 import energyEndpoints from '../src/data/cdr-energy-endpoints.json';
 import bankingEndpoints from '../src/data/cdr-banking-endpoints.json'
 import { EndpointConfig } from '../src/models/endpoint-config';
-import { userHasAuthorisedForAccount, getEndpoint, scopeForRequestIsValid, buildErrorMessage } from '../src/cdr-utils';
+import { userHasAuthorisedForAccount, getEndpoint, scopeForRequestIsValid, buildErrorMessage, paginateData } from '../src/cdr-utils';
 import { MetaError, ResponseErrorListV2 } from 'consumer-data-standards/common';
 import { CdrUser } from '../src/models/user';
 import { DsbEndpoint } from '../src/models/dsb-endpoint-entity';
 import commonEndpoints from '../src/data/cdr-common-endpoints.json';
 import { CdrConfig } from '..';
 import { DsbStandardError } from '../src/error-messsage-defintions';
+import { EnergyBillingTransaction } from 'consumer-data-standards/energy';
+import { BankingBalance } from 'consumer-data-standards/banking';
 
 describe('Utility functions', () => {
     let mockRequest: Partial<Request>;
@@ -719,4 +721,189 @@ describe('Utility functions', () => {
 
         expect(errorList.errors.length).toBe(2);      
     }) 
+
+    test('Pagination - Paginate multiple pages', async() => {
+        let data: BankingBalance[] = [
+            {
+                accountId: "12345",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "abcdfre",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "23456",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "67856",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "95467",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            }
+
+        ]
+        let query:any = {
+           "page-size": 3,
+           "page": 2
+        }
+        let paginatedData = paginateData(data, query)
+        expect(paginatedData.length).toBe(2);      
+    }) 
+
+    test('Pagination - No pagination query params uses default', async() => {
+        let data: BankingBalance[] = [
+            {
+                accountId: "12345",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "abcdfre",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "23456",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "67856",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "95467",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            }
+
+        ]
+        let query:any = {
+           "category": "CREDIT_CARD"
+        }
+        let paginatedData = paginateData(data, query)
+        expect(paginatedData.length).toBe(5);      
+    }) 
+
+    test('Pagination - Error in query paramater', async() => {
+        let data: BankingBalance[] = [
+            {
+                accountId: "12345",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "abcdfre",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "23456",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "67856",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "95467",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            }
+
+        ]
+        let query:any = {
+           "page-size": "ert",
+           "page": 2
+        }
+        let pagData = paginateData(data, query) as ResponseErrorListV2;
+        expect(pagData.errors[0].code).toBe("urn:au-cds:error:cds-all:Field/Invalid")    
+    }) 
+
+    test('Pagination - Exeeds maximum page-size', async() => {
+        let data: BankingBalance[] = [
+            {
+                accountId: "12345",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "abcdfre",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "23456",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "67856",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "95467",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            }
+
+        ]
+        let query:any = {
+           "page": 2,
+           "page-size": 1001
+        }
+        let pagData = paginateData(data, query) as ResponseErrorListV2;
+        expect(pagData.errors[0].code).toBe("urn:au-cds:error:cds-all:Field/InvalidPageSize")    
+    }) 
+
+    test('Pagination - Invalid page requested', async() => {
+        let data: BankingBalance[] = [
+            {
+                accountId: "12345",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "abcdfre",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "23456",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "67856",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "95467",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            }
+
+        ]
+        let query:any = {
+           "page": 5,
+           "page-size": 2
+        }
+        let pagData = paginateData(data, query) as ResponseErrorListV2;
+        expect(pagData.errors[0].code).toBe("urn:au-cds:error:cds-all:Field/InvalidPage")    
+    }) 
+
 });
