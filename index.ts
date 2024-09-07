@@ -12,6 +12,7 @@ import { cdrEndpointValidator } from './src/cdr-endpoint-validator';
 import { cdrScopeValidator } from './src/cdr-scope-validator';
 import { cdrResourceValidator } from './src/cdr-resource-validator';
 import { IUserService } from './src/models/user-service.interface';
+import { DsbStandardError } from './src/error-messsage-defintions';
 
 const DefaultEnergyEndpoints = [...defaultEnergyEndpoints] as EndpointConfig[];
 const DefaultBankingEndpoints = [...defaultBankingEndpoints] as EndpointConfig[];
@@ -24,6 +25,7 @@ export { DsbRequest } from './src/models/dsb-request';
 export { DsbResponse } from './src/models/dsb-response';
 export { CdrUser } from './src/models/user';
 export { CdrError } from './src/models/cdr-error';
+export { DsbStandardError } from './src/error-messsage-defintions';
 
 
 export {

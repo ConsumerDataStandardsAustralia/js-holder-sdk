@@ -47,10 +47,10 @@ export function cdrResourceValidator(userService: IUserService): any {
                 console.log("cdrResourceValidator: user not authorised, or required user not found");
                 // TODO get the account id for the error message
                 if (ep.requestPath.indexOf('/energy') >= 0) {
-                    errorList = buildErrorMessage(DsbStandardError.INVALID_ENERGY_ACCOUNT, 'data.accountIds' ,errorList);
+                    errorList = buildErrorMessage(DsbStandardError.INVALID_ENERGY_ACCOUNT, '' ,errorList);
                 }
                 if (ep.requestPath.indexOf('/banking') >= 0) {
-                    errorList = buildErrorMessage(DsbStandardError.INVALID_BANK_ACCOUNT, 'data.accountIds' ,errorList);
+                    errorList = buildErrorMessage(DsbStandardError.INVALID_BANK_ACCOUNT, '' ,errorList);
                 }
                 res.status(404).json(errorList);
                 return;                    
