@@ -7,7 +7,7 @@ import { MetaError, ResponseErrorListV2 } from 'consumer-data-standards/common';
 import { CdrUser } from '../src/models/user';
 import { DsbEndpoint } from '../src/models/dsb-endpoint-entity';
 import commonEndpoints from '../src/data/cdr-common-endpoints.json';
-import { CdrConfig } from '..';
+import { CdrConfig, getLinksPaginated } from '..';
 import { DsbStandardError } from '../src/error-messsage-defintions';
 import { EnergyBillingTransaction } from 'consumer-data-standards/energy';
 import { BankingBalance } from 'consumer-data-standards/banking';
@@ -906,4 +906,26 @@ describe('Utility functions', () => {
         expect(pagData.errors[0].code).toBe("urn:au-cds:error:cds-all:Field/InvalidPage")    
     }) 
 
+    test('Links - Correct links are returned', async() => {
+        let mockQuery:any = {
+           "page": 4,
+           "page-size": 2
+        }
+        let mockRequestObject: any = {
+            query: mockQuery,
+            host: "www.dsb.gov.au",
+            protocol: "https",
+            originalUrl:  "/cds-au/v1/energy/plans?category=ALL&page=4&page-size=2",
+            get(st: string) { 
+                return this[st]
+            }
+        }
+
+        let linkData = getLinksPaginated(mockRequestObject, 1000)
+        expect(linkData.self).toBe("https://www.dsb.gov.au/cds-au/v1/energy/plans?category=ALL&page=4&page-size=2");
+        expect(linkData.next).toBe("https://www.dsb.gov.au/cds-au/v1/energy/plans?category=ALL&page=5&page-size=2"); 
+        expect(linkData.prev).toBe("https://www.dsb.gov.au/cds-au/v1/energy/plans?category=ALL&page=3&page-size=2");
+        expect(linkData.first).toBe("https://www.dsb.gov.au/cds-au/v1/energy/plans?category=ALL&page=1&page-size=2");
+        expect(linkData.last).toBe("https://www.dsb.gov.au/cds-au/v1/energy/plans?category=ALL&page=500&page-size=2");      
+    }) 
 });

@@ -11,7 +11,7 @@ import { DsbStandardError } from "./error-messsage-defintions";
 
 const defaultEndpoints = [...energyEndpoints, ...bankingEndpoints, ...commonEndpoints] as DsbEndpoint[];
 
-export function cdrEndpointValidator(config: CdrConfig | undefined) {
+export function cdrEndpointValidator(config: CdrConfig | undefined): any {
 
     return function endpoint(req: Request, res: Response, next: NextFunction): any {
         console.log("cdrEndpointValidator.....");

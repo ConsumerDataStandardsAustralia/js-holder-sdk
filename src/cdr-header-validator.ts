@@ -21,7 +21,7 @@ const defaultEndpoints = [...energyEndpoints, ...bankingEndpoints, ...commonEndp
 
 export function cdrHeaderValidator(config: CdrConfig | undefined): any {
     
-    return function headers(req: Request, res: DsbResponse, next: NextFunction) {
+    return function headers(req: Request, res: Response, next: NextFunction) {
         console.log("cdrHeaderValidator.....");
         let errorList : ResponseErrorListV2 = {
             errors:  []
@@ -54,11 +54,6 @@ export function cdrHeaderValidator(config: CdrConfig | undefined): any {
             res.setHeader('x-v', maxSupportedVersion);
     
             errorList = evaluateXFapiHeader(req, res, ep, errorList);
-            // if (versionXFapiValidationErrors.length > 0) {
-            //     versionXFapiValidationErrors.forEach(e => {
-            //         errorList.errors.push({code: e.code, title: e.title, detail: e.detail});
-            //     })
-            // } 
             // If the minimum requested version is larger than the requested version, effectively ignore x-min-v
             if (requestVersionObject.minrequestedVersion > requestVersionObject.requestedVersion) {
                 requestVersionObject.minrequestedVersion = requestVersionObject.requestedVersion;

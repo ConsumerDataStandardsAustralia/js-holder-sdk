@@ -7,7 +7,7 @@ import defaultEnergyEndpoints  from './src/data/default-energy.json';
 import defaultBankingEndpoints from './src/data/default-banking.json';
 import defaultCommonEndpoints from './src/data/default-common.json';
 import { EndpointConfig } from './src/models/endpoint-config';
-import { buildErrorMessage, getEndpoint } from './src/cdr-utils';
+import { buildErrorMessage, getEndpoint, getLinksPaginated, getMetaPaginated, paginateData } from './src/cdr-utils';
 import { cdrEndpointValidator } from './src/cdr-endpoint-validator';
 import { cdrScopeValidator } from './src/cdr-scope-validator';
 import { cdrResourceValidator } from './src/cdr-resource-validator';
@@ -30,6 +30,6 @@ export {
      cdrHeaderValidator, cdrTokenValidator, cdrJwtScopes,
      cdrEndpointValidator, cdrScopeValidator, cdrResourceValidator,
      DefaultEnergyEndpoints, DefaultBankingEndpoints, DefaultCommonEndpoints,
-     getEndpoint, IUserService, buildErrorMessage
+     getEndpoint, IUserService, buildErrorMessage, getLinksPaginated, getMetaPaginated, paginateData
 }
 
