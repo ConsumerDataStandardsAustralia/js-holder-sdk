@@ -138,6 +138,9 @@ This can be used for any IdAM which returns the access token as an JWT and the s
 | The access token from the IdAM is a JWT and scopes are an array of strings | The request object will be extended |
 | The access token from the IdAM is a JWT and scopes are a space separated string | The request object will be extended |
 
+
+## Utility Functions
+
 ### buildErrorMessage
 
 This function will return a `ReponseErrorListV2`. It will use the standard DSB error code (eg urn:au-cds:error:cds-banking:
