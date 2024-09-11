@@ -82,14 +82,6 @@ describe('Endpoint validation middleware', () => {
             endpoints: endpoints
         }
         let returnedErrors: any = buildErrorMessage(DsbStandardError.RESOURCE_NOT_FOUND, 'This endpoint is not a CDR endpoint')
-
-        // let returnedErrors: ResponseErrorListV2 = {
-        //     errors: [ {
-        //         code: 'urn:au-cds:error:cds-all:Resource/NotFound',
-        //         title: 'NotFound',
-        //         detail: 'This endpoint is not a CDR endpoint'
-        //     }]
-        // };
         let auth = cdrEndpointValidator(config);
         auth(mockRequest as Request, mockResponse as Response, nextFunction as NextFunction);
         expect(mockStatus.json).toBeCalledWith(returnedErrors);
