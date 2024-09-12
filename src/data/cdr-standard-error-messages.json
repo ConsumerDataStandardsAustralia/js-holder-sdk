@@ -1,0 +1,206 @@
+[
+    {
+        "errorMessageId": "MISSING_REQUIRED_FIELD",
+        "errorCode": "urn:au-cds:error:cds-all:Field/Missing",
+        "errorTitle": "Missing Required Field",
+        "httpReturnCode": 400
+    },
+    {
+        "errorMessageId": "MISSING_REQUIRED_HEADER",
+        "errorCode": "urn:au-cds:error:cds-all:Header/Missing",
+        "errorTitle": "Missing Required Header",
+        "httpReturnCode": 400
+    },
+    {
+        "errorMessageId": "INVALID_FIELD",
+        "errorCode": "urn:au-cds:error:cds-all:Field/Invalid",
+        "errorTitle": "Invalid Field",
+        "httpReturnCode": 400
+    },
+    {
+        "errorMessageId": "INVALID_HEADER",
+        "errorCode": "urn:au-cds:error:cds-all:Header/Invalid",
+        "errorTitle": "Invalid Header",
+        "httpReturnCode": 400
+    },
+    {
+        "errorMessageId": "INVALID_DATE",
+        "errorCode": "urn:au-cds:error:cds-all:Field/InvalidDateTime",
+        "errorTitle": "Invalid Date",
+        "httpReturnCode": 400
+    },
+    {
+        "errorMessageId": "INVALID_PAGE_SIZE",
+        "errorCode": "urn:au-cds:error:cds-all:Field/InvalidPageSize",
+        "errorTitle": "Invalid Page Size",
+        "httpReturnCode": 400
+    },
+    {
+        "errorMessageId": "INVALID_VERSION",
+        "errorCode": "urn:au-cds:error:cds-all:Header/InvalidVersion",
+        "errorTitle": "Invalid Version",
+        "httpReturnCode": 400
+    },
+    {
+        "errorMessageId": "ADR_NOT_ACTIVE",
+        "errorCode": "urn:au-cds:error:cds-all:Authorisation/AdrStatusNotActive",
+        "errorTitle": "ADR Status Is Not Active",
+        "httpReturnCode": 403
+    },
+    {
+        "errorMessageId": "CONSENT_REVOKED",
+        "errorCode": "urn:au-cds:error:cds-all:Authorisation/RevokedConsent",
+        "errorTitle": "Consent Is Revoked",
+        "httpReturnCode": 403
+    } ,
+    {
+        "errorMessageId": "CONSENT_INVALID",
+        "errorCode": "urn:au-cds:error:cds-all:Authorisation/InvalidConsent",
+        "errorTitle": "Consent Is Invalid",
+        "httpReturnCode": 403
+    },
+    {
+        "errorMessageId": "RESOURCE_NOT_IMPLEMENTED",
+        "errorCode": "urn:au-cds:error:cds-all:Resource/NotImplemented",
+        "errorTitle": "Resource Not Implemented",
+        "httpReturnCode": 404
+    },
+    {
+        "errorMessageId": "RESOURCE_NOT_FOUND",
+        "errorCode": "urn:au-cds:error:cds-all:Resource/NotFound",
+        "errorTitle": "Resource Not Found",
+        "httpReturnCode": 404
+    },
+    {
+        "errorMessageId": "INVALID_RESOURCE",
+        "errorCode": "urn:au-cds:error:cds-all:Resource/Invalid",
+        "errorTitle": "Invalid Resource",
+        "httpReturnCode": 404
+    },
+    {
+        "errorMessageId": "UNAVAILABLE_RESOURCE",
+        "errorCode": "urn:au-cds:error:cds-all:Resource/Unavailable",
+        "errorTitle": "Unavailable Resource",
+        "httpReturnCode": 404
+    },
+    {
+        "errorMessageId": "INVALID_BANK_ACCOUNT",
+        "errorCode": "urn:au-cds:error:cds-banking:Authorisation/InvalidBankingAccount",
+        "errorTitle": "Invalid Banking Account",
+        "httpReturnCode": 404
+    },
+    {
+        "errorMessageId": "UNAVAILABLE_BANK_ACCOUNT",
+        "errorCode": "urn:au-cds:error:cds-banking:Authorisation/UnavailableBankingAccount",
+        "errorTitle": "Unavailable Banking Account",
+        "httpReturnCode": 404
+    },
+    {
+        "errorMessageId": "INVALID_ENERGY_ACCOUNT",
+        "errorCode": "urn:au-cds:error:cds-energy:Authorisation/InvalidEnergyAccount",
+        "errorTitle": "Invalid Energy Account",
+        "httpReturnCode": 404
+    },
+    {
+        "errorMessageId": "UNAVAILABLE_ENERGY_ACCOUNT",
+        "errorCode": "urn:au-cds:error:cds-energy:Authorisation/UnavailableEnergyAccount",
+        "errorTitle": "Unavailable Energy Account",
+        "httpReturnCode": 404
+    } ,
+    {
+        "errorMessageId": "INVALID_SERVICE_POINT",
+        "errorCode": "urn:au-cds:error:cds-energy:Authorisation/InvalidServicePoint",
+        "errorTitle": "Invalid Service Point",
+        "httpReturnCode": 404
+    },
+    {
+        "errorMessageId": "UNAVAILABLE_SERVICE_POINT",
+        "errorCode": "urn:au-cds:error:cds-energy:Authorisation/UnavailableServicePoint",
+        "errorTitle": "Unavailable Service Point",
+        "httpReturnCode": 404
+    },
+    {
+        "errorMessageId": "UNSUPPORTED_VERSION",
+        "errorCode": "urn:au-cds:error:cds-all:Header/UnsupportedVersion",
+        "errorTitle": "Unsupported Version",
+        "httpReturnCode": 406
+    },
+    {
+        "errorMessageId": "INVALID_RESOURCE_POST",
+        "errorCode": "urn:au-cds:error:cds-all:Resource/Invalid",
+        "errorTitle": "Invalid Resource",
+        "httpReturnCode": 422
+    },
+    {
+        "errorMessageId": "UNAVAILABLE_RESOURCE_POST",
+        "errorCode": "urn:au-cds:error:cds-all:Resource/Unavailable",
+        "errorTitle": "Unavailable Resource",
+        "httpReturnCode": 422
+    },
+    {
+        "errorMessageId": "INVALID_BANK_ACCOUNT_POST",
+        "errorCode": "urn:au-cds:error:cds-banking:Authorisation/InvalidBankingAccount",
+        "errorTitle": "Invalid Banking Account",
+        "httpReturnCode": 422
+    },
+    {
+        "errorMessageId": "UNAVAILABLE_BANK_ACCOUNT_POST",
+        "errorCode": "urn:au-cds:error:cds-banking:Authorisation/UnavailableBankingAccount",
+        "errorTitle": "Unavailable Banking Account",
+        "httpReturnCode": 422
+    },
+    {
+        "errorMessageId": "INVALID_ENERGY_ACCOUNT_POST",
+        "errorCode": "urn:au-cds:error:cds-energy:Authorisation/InvalidEnergyAccount",
+        "errorTitle": "Invalid Energy Account",
+        "httpReturnCode": 422
+    },
+    {
+        "errorMessageId": "UNAVAILABLE_ENERGY_ACCOUNT_POST",
+        "errorCode": "urn:au-cds:error:cds-energy:Authorisation/UnavailableEnergyAccount",
+        "errorTitle": "Unavailable Energy Account",
+        "httpReturnCode": 422
+    } ,
+    {
+        "errorMessageId": "INVALID_SERVICE_POINT_POST",
+        "errorCode": "urn:au-cds:error:cds-energy:Authorisation/InvalidServicePoint",
+        "errorTitle": "Invalid Service Point",
+        "httpReturnCode": 422
+    },
+    {
+        "errorMessageId": "UNAVAILABLE_SERVICE_POINT_POST",
+        "errorCode": "urn:au-cds:error:cds-energy:Authorisation/UnavailableServicePoint",
+        "errorTitle": "Unavailable Service Point",
+        "httpReturnCode": 422
+    },
+    {
+        "errorMessageId": "INVALID_ARRANGEMENT",
+        "errorCode": "urn:au-cds:error:cds-all:Authorisation/InvalidArrangement",
+        "errorTitle": "Invalid Consent Arrangement",
+        "httpReturnCode": 422
+    } ,
+    {
+        "errorMessageId": "INVALID_PAGE",
+        "errorCode": "urn:au-cds:error:cds-all:Field/InvalidPage",
+        "errorTitle": "Invalid Page",
+        "httpReturnCode": 422
+    },
+    {
+        "errorMessageId": "INVALID_BRAND",
+        "errorCode": "urn:au-cds:error:cds-register:Field/InvalidBrand",
+        "errorTitle": "Invalid Brand",
+        "httpReturnCode": 404
+    } ,
+    {
+        "errorMessageId": "INVALID_INDUSTRY",
+        "errorCode": "urn:au-cds:error:cds-register:Field/InvalidIndustry",
+        "errorTitle": "Invalid Industry",
+        "httpReturnCode": 404
+    },
+    {
+        "errorMessageId": "INVALID_SOFTWARE_PRODUCT",
+        "errorCode": "urn:au-cds:error:cds-register:Field/InvalidSoftwareProduct",
+        "errorTitle": "Invalid Software Product",
+        "httpReturnCode": 404
+    }                                                                            
+]

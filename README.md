@@ -138,6 +138,143 @@ This can be used for any IdAM which returns the access token as an JWT and the s
 | The access token from the IdAM is a JWT and scopes are an array of strings | The request object will be extended |
 | The access token from the IdAM is a JWT and scopes are a space separated string | The request object will be extended |
 
+
+## Utility Functions
+
+### buildErrorMessage
+
+This function will return a `ReponseErrorListV2`. It will use the standard DSB error code (eg urn:au-cds:error:cds-banking:
+Authorisation/InvalidBankingAccount) depending on the errorMessageId being passed in
+
+| Parameter | Description |
+| --- | --- |
+| errorMessageId | an identifier as per `DsbStandardError` defintions |
+| errorDetail | which will be the `details` property on the returned error object |
+| errorList (optional) | an existing error list. The error object wil be appendd to that list |
+| metaData (optional) | options metadata object |
+
+Example:
+```
+let msg = buildErrorMessage(DsbStandardError.INVALID_BANK_ACCOUNT, "123456");
+
+// returns this as msg
+    "errors": [
+        {
+            "code": "urn:au-cds:error:cds-banking:Authorisation/InvalidBankingAccount",
+            "title": "Invalid Banking Account",
+            "detail": "123456"
+        }
+    ]
+```
+
+### getLinksPaginated
+| Parameter | Description |
+| --- | --- |
+| req | The request object |
+| totalRecords | The total number of records in the dataset |
+
+
+Example:
+if the req object has a url `https://www.dsb.gov.au/cds-au/v1/energy/plans?category=ALL&page=4&page-size=2`
+```
+getLinksPaginated(req, 1000)
+```
+will return 
+```
+{
+    self: "https://www.dsb.gov.au/cds-au/v1/energy/plans?category=ALL&page=4&page-size=2",
+    next: "https://www.dsb.gov.au/cds-au/v1/energy/plans?category=ALL&page=5&page-size=2",
+    prev: "https://www.dsb.gov.au/cds-au/v1/energy/plans?category=ALL&page=3&page-size=2",
+    first: "https://www.dsb.gov.au/cds-au/v1/energy/plans?category=ALL&page=1&page-size=2",
+    last: "https://www.dsb.gov.au/cds-au/v1/energy/plans?category=ALL&page=500&page-size=2"
+}
+```
+
+### getMetaPaginated 
+
+Will return a `MetaPaginated` object
+| Parameter | Description |
+| --- | --- |
+| totalRecords | The total number of records in the dataset |
+| query (optional) | The query property from the Request object |
+
+Example:
+
+getMetaPaginated(1000)
+
+This use the default `page-size=25` since no query parameters are passes in.
+Therefore, this will return
+```
+{
+    totalRecords: 1000,
+    totalPages: 40
+}
+```
+
+### paginateData
+
+This will return a subset of `data` depending on the `page-size` and `page` properties from the Request query object
+
+| Parameter | Description |
+| --- | --- |
+| data | an array of data objects. |
+| query | typycally this will be the query property from the Request object  |
+
+Example:
+```
+let data: any = [
+            {
+                "amount": "4439.65",
+                "description": "payment transaction at Durgan and Sons using card ending with ***(...6407) for XAU 365.41 in account ***06028839",
+            },
+            {
+
+                "accountId": "d339f6db-cd8d-413f-95e4-ec9e8e9d806f",
+                "amount": "318.99",
+                "description": "payment transaction at Gleason - Fadel using card ending with ***(...6904) for SYP 219.10 in 
+            },
+            {
+                "extendedData": {
+                    "service": "X2P1.01",
+                    "payer": "Angelica Beatty"
+                },
+            },
+            {
+                "amount": "4013.89",
+                "description": "payment transaction at Watson, Braun and Bartell using card ending with ***(...6802) for GEL 281.13 in account ***74872985",
+                "isDetailAvailable": true,
+            },
+            {
+                "executionDateTime": "2024-01-20T12:49:36.782Z",
+                "apcaNumber": "572618"
+            },
+]
+```
+and a query object 
+```
+let query: any = {
+   "page-size": "2",
+   "page" : "2"
+}
+```
+then `paginateData(data, query)` returns
+
+```
+    [
+            {
+                "extendedData": {
+                    "service": "X2P1.01",
+                    "payer": "Angelica Beatty"
+                },
+            },
+            {
+                "amount": "4013.89",
+                "description": "payment transaction at Watson, Braun and Bartell using card ending with ***(...6802) for GEL 281.13 in account ***74872985",
+                "isDetailAvailable": true,
+            }
+    ]
+```
+
 ## Local Setup and Customisation
 
 ### Prerequisites

@@ -134,7 +134,7 @@ describe('Authorization middleware', () => {
         let returnedErrors: ResponseErrorListV2 = {
             errors: [{
                 code: 'urn:au-cds:error:cds-all:Authorisation/InvalidConsent',
-                title: 'InvalidConsent',
+                title: 'Consent Is Invalid',
                 detail: 'Invalid scope'
             }]
         };

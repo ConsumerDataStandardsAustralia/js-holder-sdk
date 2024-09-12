@@ -1,8 +1,9 @@
 
 import { Request, Response, NextFunction } from 'express';
-import { scopeForRequestIsValid } from './cdr-utils';
+import { buildErrorMessage, scopeForRequestIsValid } from './cdr-utils';
 import { ResponseErrorListV2 } from 'consumer-data-standards/common';
 import { IUserService } from './models/user-service.interface';
+import { DsbStandardError } from './error-messsage-defintions';
 
 export function cdrScopeValidator(userService: IUserService): any {
 
@@ -14,7 +15,7 @@ export function cdrScopeValidator(userService: IUserService): any {
         let user = userService.getUser(req);
         if (scopeForRequestIsValid(req, user?.scopes_supported) == false) {
             console.log("cdrScopeValidator: scopes for request are invalid.");
-            errorList.errors.push({code: 'urn:au-cds:error:cds-all:Authorisation/InvalidConsent', title: 'InvalidConsent', detail: 'Invalid scope'})
+            errorList = buildErrorMessage(DsbStandardError.CONSENT_INVALID,'Invalid scope',errorList);
             res.status(403).json(errorList);
             return;         
         } 

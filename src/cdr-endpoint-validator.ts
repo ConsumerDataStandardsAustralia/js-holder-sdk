@@ -1,5 +1,5 @@
 import { ResponseErrorListV2 } from "consumer-data-standards/common";
-import { getEndpoint } from "./cdr-utils";
+import { buildErrorMessage, getEndpoint } from "./cdr-utils";
 import { Request, Response, NextFunction } from 'express';
 import { CdrConfig } from "./models/cdr-config";
 import energyEndpoints from './data/cdr-energy-endpoints.json';
@@ -7,10 +7,11 @@ import bankingEndpoints from './data/cdr-banking-endpoints.json';
 import commonEndpoints from './data/cdr-common-endpoints.json';
 import { EndpointConfig } from "./models/endpoint-config";
 import { DsbEndpoint } from "./models/dsb-endpoint-entity";
+import { DsbStandardError } from "./error-messsage-defintions";
 
 const defaultEndpoints = [...energyEndpoints, ...bankingEndpoints, ...commonEndpoints] as DsbEndpoint[];
 
-export function cdrEndpointValidator(config: CdrConfig | undefined) {
+export function cdrEndpointValidator(config: CdrConfig | undefined): any {
 
     return function endpoint(req: Request, res: Response, next: NextFunction): any {
         console.log("cdrEndpointValidator.....");
@@ -31,13 +32,13 @@ export function cdrEndpointValidator(config: CdrConfig | undefined) {
             console.log(`isDsbEndpoint=${isDsbEndpoint}`);
             if (!isDsbEndpoint) {
                 console.log(`cdrEndpointValidator: No CDR endpoint found for url ${req.url}`);
-                errorList.errors.push({code: 'urn:au-cds:error:cds-all:Resource/NotFound', title: 'NotFound', detail: 'This endpoint is not a CDR endpoint'}) ;
-                res.status(404).json(errorList); 
+                buildErrorMessage(DsbStandardError.RESOURCE_NOT_FOUND, 'This endpoint is not a CDR endpoint', errorList)
+                   res.status(404).json(errorList); 
                 return;  
             }
             if (returnEP == null) {
                 console.log(`cdrEndpointValidator: Valid endpoint but has not been implemented: ${req.url}`);
-                errorList.errors.push({code: 'urn:au-cds:error:cds-all:Resource/NotImplemented', title: 'NotImplemented', detail: 'This endpoint has not been implemented'});
+                buildErrorMessage(DsbStandardError.RESOURCE_NOT_IMPLEMENTED, 'This endpoint has not been implemented', errorList)
                 res.status(404).json(errorList);
                 return;
             }

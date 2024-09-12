@@ -3,13 +3,18 @@ import { DsbEndpoint } from './models/dsb-endpoint-entity';
 import energyEndpoints from './data/cdr-energy-endpoints.json';
 import bankingEndpoints from './data/cdr-banking-endpoints.json';
 import commonEndpoints from './data/cdr-common-endpoints.json';
+import standardErrors from './data/cdr-standard-error-messages.json'
 import { CdrConfig } from './models/cdr-config';
 import { CdrUser } from './models/user';
+import { MetaError, ResponseErrorListV2 } from 'consumer-data-standards/common';
+import { DsbStandardError } from './error-messsage-defintions';
+import { CdrError } from './models/cdr-error';
+import { LinksPaginated, MetaPaginated } from 'consumer-data-standards/banking';
 
 const defaultEndpoints = [...energyEndpoints, ...bankingEndpoints, ...commonEndpoints];
 
 // If no config is specified than a config with the default endpoints is being used
-export function getEndpoint(req: Request, options: CdrConfig | undefined): DsbEndpoint | null {
+export function getEndpoint(req: any, options: CdrConfig | undefined): DsbEndpoint | null {
     var endpoints: DsbEndpoint[] = [];
     if (options?.endpoints == null) {
         endpoints = defaultEndpoints as DsbEndpoint[];
@@ -22,7 +27,7 @@ export function getEndpoint(req: Request, options: CdrConfig | undefined): DsbEn
         })
         endpoints = dsbEndpoints;
     }
-    let requestUrlElements: string[] = req.url.split('?');
+    let requestUrlElements: string[] = req?.url.split('?');
     // create an array with all the path elements
     let requestUrlArray = requestUrlElements[0].split('/').splice(1);
     requestUrlArray = removeEmptyEntries(requestUrlArray);
@@ -46,7 +51,7 @@ export function getEndpoint(req: Request, options: CdrConfig | undefined): DsbEn
     // this array should have at least 2 entries. There is no CDR endpoint with less than that
     if (requestUrlArray.length < 2) return null;
     // get a subset of endpoints this url could be, filter by the first two parts of url and request type
-    let urlSubSet = endpoints.filter(x => x.requestPath.toLowerCase().startsWith(`/${requestUrlArray[0]}/${requestUrlArray[1]}`) && x.requestType == req.method);
+    let urlSubSet = endpoints.filter(x => x.requestPath.toLowerCase().startsWith(`/${requestUrlArray[0]}/${requestUrlArray[1]}`) && x.requestType == req?.method);
     let returnEP = null;
 
     urlSubSet.forEach(u => {
@@ -74,15 +79,145 @@ export function getEndpoint(req: Request, options: CdrConfig | undefined): DsbEn
     return returnEP;
 }
 
-export function findXFapiRequired(req: Request): boolean {
+export function findXFapiRequired(req: any): boolean {
     try {
-        let idx = defaultEndpoints.findIndex(x => req.url.includes(x.requestPath));
+        let idx = defaultEndpoints.findIndex(x => req?.url.includes(x.requestPath));
         let ep = defaultEndpoints[idx];
         return ep.requiresXFAPI ??= true;
     } catch(e) {
         return true;
     }
 }
+
+export function buildErrorMessage(errorMessageId: DsbStandardError, errorDetail: string, errorList?: ResponseErrorListV2 | undefined, metaData?: MetaError): ResponseErrorListV2 {
+    var retVal: ResponseErrorListV2;
+    // if a list is passed in then we will append this error, otherwise create new error list
+    if (errorList == null){
+        var retVal: ResponseErrorListV2 = {
+            errors: [
+            ]
+        }
+    }
+    else{
+        retVal = errorList;
+    }
+    let dsbError: any = standardErrors.find(x => x.errorMessageId == errorMessageId);
+
+    let error: any = {
+        code : dsbError?.errorCode,
+        title: dsbError?.errorTitle,
+    }
+    if (errorDetail != null) {
+        error.detail = errorDetail
+    }
+    if (metaData != null) {
+        error.meta = metaData
+    }
+    retVal.errors.push(error);
+    return retVal;
+}
+
+// Utility functions for pagination and building of Links and Meta objects
+// Paginate data array based on pagination query parameters. Will default to page sixe 25
+export function paginateData(data: any[], query: any): any | ResponseErrorListV2{
+    let pageSize = 25; //Default
+    let page = 1;
+    if (query["page-size"] != null && query["page-size"] != ""){
+        pageSize = parseInt(query["page-size"]);
+        if (isNaN(pageSize)) {
+            let error: ResponseErrorListV2 = buildErrorMessage(DsbStandardError.INVALID_FIELD, `Invalid page-size parameter: ${pageSize}`)
+            return error;  
+        }
+        if (pageSize > 1000) {
+            let error: ResponseErrorListV2 = buildErrorMessage(DsbStandardError.INVALID_PAGE_SIZE, `page-size ${pageSize} exceeds maximum`)
+            return error;  
+        }
+    }
+        
+    if (query["page"] != null && query["page"] != ""){
+        page = parseInt(query["page"]);
+        if (isNaN(page)) {
+            let error: ResponseErrorListV2 = buildErrorMessage(DsbStandardError.INVALID_FIELD, `Invalid page parameter: ${page}`)
+            return error;  
+        }
+    }
+        
+    
+    let cnt: number = data?.length;
+    let pages = Math.ceil(cnt / pageSize);
+    if (pages > 0 && pages < page) {
+        let error: ResponseErrorListV2 = buildErrorMessage(DsbStandardError.INVALID_PAGE, `Maximum number of pages: ${pages}`)
+        return error;
+    }
+    let startIdx = Math.max(0, (page - 1) * pageSize);
+    let endIdx = Math.min(startIdx + pageSize, cnt);
+    if (startIdx >= cnt || startIdx > endIdx)
+        return [];
+    // check for invalid page request
+    return data?.slice(startIdx, endIdx);
+}
+
+export function getLinksPaginated(req: any, totalRecords: number): LinksPaginated {
+    let pageSize = 25; //Default
+    let page = 1;
+    if (req?.query != undefined) {
+        if (req.query["page-size"] != null && req.query["page-size"] != "")
+            pageSize = parseInt(req.query["page-size"]);
+        if (req.query["page"] != null && req.query["page"] != "")
+            page = parseInt(req.query["page"]);
+    }
+
+    let pages = Math.ceil(totalRecords / pageSize);
+
+    //get the string component from the url that specifies page=n and put 
+    let idx = req?.originalUrl.indexOf("page=");
+    let st = req?.originalUrl.substring(idx);
+    let idx2 = Math.max(st.indexOf("&"), 0);
+    let pageString = st.substring(0,idx2);
+
+    
+    let nextPage = Math.min(page + 1, pages);
+    let newPageSt = "page=" + nextPage;
+    let next = req?.originalUrl.replace(pageString, newPageSt);
+
+    let lastPageSt = "page=" + pages;
+    let last = req?.originalUrl.replace(pageString, lastPageSt);
+
+    let firstPageSt = "page=1";
+    let first = req?.originalUrl.replace(pageString, firstPageSt);
+
+    let prevPage = Math.max(page - 1, 1); 
+    let prevPageSt = "page=" + prevPage;
+    let prev = req?.originalUrl.replace(pageString, prevPageSt);
+
+    let lp: LinksPaginated = {
+        self: req?.protocol + '://' + req?.get('host') + req?.originalUrl
+    }
+    // not the last page
+    if (page < pages){
+        lp.next = req?.protocol + '://' + req?.get('host') + next;
+        lp.last = req?.protocol + '://' + req?.get('host') + last
+    }
+    // not the first page
+    if (req?.query["page"] != null && page > 1) {
+        lp.prev = req?.protocol + '://' + req?.get('host') + prev;
+        lp.first = req?.protocol + '://' + req?.get('host') + first
+    }
+    return lp;
+}
+
+export function getMetaPaginated(totalRecords: number, query: any | undefined): MetaPaginated {
+    let pageSize = 25;
+    if (query["page-size"] != null)
+        pageSize = Math.max(1, parseInt(query["page-size"] as string));
+    let pages = Math.ceil(totalRecords / pageSize);
+    let mp: MetaPaginated = {
+        totalPages: pages,
+        totalRecords: totalRecords
+    }
+    return mp;
+}
+
 
 function arraysAreEqual(a: string[], b: string[]): boolean {
     const equals = (a.length === b.length &&
@@ -160,7 +295,7 @@ function removeBasePath(basePath: string | undefined, pathArray: string[]): stri
     return pathArray.slice(baseArray.length);
 }
 
-export function scopeForRequestIsValid(req: Request, scopes: string[] | undefined): boolean {
+export function scopeForRequestIsValid(req: any, scopes: string[] | undefined): boolean {
     try {
         let ep = findEndpointConfig(req);
         // endpoint exists and no scopes are required
@@ -185,7 +320,7 @@ export function scopeForRequestIsValid(req: Request, scopes: string[] | undefine
 }
 
 // This will examine the request url, find any account identifiers and validate against the authorised user object
-export function userHasAuthorisedForAccount(req: Request, user: CdrUser | undefined): boolean | undefined {
+export function userHasAuthorisedForAccount(req: any, user: CdrUser | undefined): boolean | undefined {
 
     console.log(`Checking auth status for user ${JSON.stringify(user)}`);
     let ep: DsbEndpoint = findEndpointConfig(req) as DsbEndpoint;
@@ -195,14 +330,14 @@ export function userHasAuthorisedForAccount(req: Request, user: CdrUser | undefi
     }
 
     if (endpointRequiresAuthentication(ep) == false) {
-        console.log(`No authentication required for: ${req.url}`);
+        console.log(`No authentication required for: ${req?.url}`);
         return true;
     }
 
     // The endpoint is a GET request without any reource ids in the url
     if (ep.requestType == 'GET'){
         if (urlHasResourceIdentifier(req) == false) {
-            console.log(`No resource identifier in GET url: ${req.url}`);
+            console.log(`No resource identifier in GET url: ${req?.url}`);
             return true;
         }
     }
@@ -216,12 +351,12 @@ export function userHasAuthorisedForAccount(req: Request, user: CdrUser | undefi
     if (ep.requestType == 'POST'){          
         if (ep.requestPath.indexOf('/banking') >= 0) {
             // a POST request with no account ids passed in, not authorised 
-            let reqBody: any = req.body;
+            let reqBody: any = req?.body;
             if (user?.accountsBanking == null || reqBody?.data?.accountIds == null || user?.accountsBanking.length < 1) return false;
             
             let retVal :boolean = true;
             reqBody.data?.accountIds.forEach((id: string) => {
-                if (user.accountsBanking?.find(x => x == id) == null){
+                if (user.accountsBanking?.find((x:string) => x == id) == null){
                     console.log(`Authorisation for account id: ${id} not found`);
                     retVal = false;
                     return;
@@ -231,7 +366,7 @@ export function userHasAuthorisedForAccount(req: Request, user: CdrUser | undefi
         }
         else if (ep.requestPath.indexOf('/energy') >= 0) {
             // a POST request with no account ids passed in, not authorised 
-            let reqBody: any = req.body;
+            let reqBody: any = req?.body;
             // if neither service points or accounts have been specified exist here
             if ((user?.accountsEnergy == null || user?.accountsEnergy.length < 1)
                 && (user?.energyServicePoints == null || user?.energyServicePoints?.length < 1))
@@ -270,49 +405,49 @@ export function userHasAuthorisedForAccount(req: Request, user: CdrUser | undefi
     else if (ep.requestType == 'GET') {
         let url = createSearchUrl(req)?.toLowerCase();
         if (url == undefined) {
-            console.log(`The url is not a CDR enpoint url ${req.url}`);
+            console.log(`The url is not a CDR enpoint url ${req?.url}`);
             return false;
         }
       
         if (url.indexOf('/banking/products') > -1) {
-            console.log(`No authorisation required for: ${req.url}`);
+            console.log(`No authorisation required for: ${req?.url}`);
             return true;
         }
         
         if (url.indexOf('/energy/plans') > -1){
-            console.log(`No authorisation required for: ${req.url}`);
+            console.log(`No authorisation required for: ${req?.url}`);
             return true;
         }
     
         if (url.indexOf('/banking/accounts') > -1) {
-            console.log(`Checking authorisation for: ${req.url}`);
+            console.log(`Checking authorisation for: ${req?.url}`);
             let ret = checkBankAccountRoute(url, user);
             console.log(`Authorisation status: ${ret}`);
             return ret;
         }
     
         if (url.indexOf('/banking/payments/scheduled') > -1) {
-            console.log(`Checking authorisation for: ${req.url}`);
+            console.log(`Checking authorisation for: ${req?.url}`);
             let ret = checkBankingPaymentRoute(req, user);
             console.log(`Authorisation status: ${ret}`);
             return ret;
         }
         if (url.indexOf('/banking/payees') > -1) {
-            console.log(`Checking authorisation for: ${req.url}`);
+            console.log(`Checking authorisation for: ${req?.url}`);
             let ret = checkBankingPayeeRoute(url, user);
             console.log(`Authorisation status: ${ret}`);
             return ret;
         }
     
         if (url.indexOf('/energy/accounts') > -1) {
-            console.log(`Checking authorisation for: ${req.url}`);
+            console.log(`Checking authorisation for: ${req?.url}`);
             let ret = checkEnergyAccountRoute(url, user);
             console.log(`Authorisation status: ${ret}`);
             return ret;
         }
     
         if (url.indexOf('/energy/electricity/servicepoints') > -1) {
-            console.log(`Checking authorisation for: ${req.url}`);
+            console.log(`Checking authorisation for: ${req?.url}`);
             let ret = checkEnergyElectricityRoute(url, user);
             console.log(`Authorisation status: ${ret}`);
             return ret;
@@ -469,12 +604,12 @@ function checkEnergyElectricityRoute(url: string, user: CdrUser): boolean {
 // Return true if the resource id (from url) is in the list of consented resource ids (from user object)
 // Validates the resource id found in any of the /banking/payments/scheduled/*** urls against the resource ids in the user object
 function checkBankingPaymentRoute(req: Request, user: CdrUser): boolean {
-    let startPos = req.url.indexOf('/banking/payments/scheduled');
+    let startPos = req?.url.indexOf('/banking/payments/scheduled');
     let l1 = '/banking/payments/scheduled'.length;
-    let subStr = req.url.substring(startPos + l1, req.url.length).replace(/\/+$/, '').toLowerCase();
+    let subStr = req?.url.substring(startPos + l1, req?.url.length).replace(/\/+$/, '').toLowerCase();
 
     if (subStr.length == 0) {
-        if (req.method == 'POST') {
+        if (req?.method == 'POST') {
             if (user.accountsBanking == null) {
                 return false;
             }
@@ -531,11 +666,11 @@ function checkBankingPayeeRoute(url: string, user: CdrUser): boolean {
 // The returned DsbEndpoint object contains the parameters required to perform logic
 function findEndpointConfig(req: Request): DsbEndpoint | undefined {
     // remove the host and assign to urlId  
-    let tmp = req.url.substring(req.url.indexOf('//') + 2);
+    let tmp = req?.url.substring(req?.url.indexOf('//') + 2);
     let originalPath = tmp.substring(tmp.indexOf('/'));
 
     // create an array with all the path elements
-    let requestUrlArray = req.url.split('/').splice(1);
+    let requestUrlArray = req?.url.split('/').splice(1);
     // ensure that the cds-au/v1 exists
     if (requestUrlArray.length < 3) {
         // this cannot be a CDR endpoint
@@ -563,7 +698,7 @@ function findEndpointConfig(req: Request): DsbEndpoint | undefined {
     do {
         idx++;
         let searchPath = buildPath(searchArray);
-        returnEP = defaultEndpoints.find(x => x.requestPath == searchPath && x.requestType == req.method);
+        returnEP = defaultEndpoints.find(x => x.requestPath == searchPath && x.requestType == req?.method);
 
         if (returnEP == null) {
             searchArray.splice(searchArray.length - 1, 1);
@@ -595,7 +730,7 @@ function findEndpointConfig(req: Request): DsbEndpoint | undefined {
 
 // This will read the part of the url from cds-au/v1, stripping out any query parameters
 function createSearchUrl(req: Request): string | undefined {
-    let url = req.url.substring(req.url.indexOf('//') + 2).toLowerCase();
+    let url = req?.url.substring(req?.url.indexOf('//') + 2).toLowerCase();
     let baseIdx = url.indexOf('cds-au/v1')
     if (baseIdx == -1)
         return undefined;

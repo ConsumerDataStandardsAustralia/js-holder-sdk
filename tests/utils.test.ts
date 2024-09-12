@@ -2,12 +2,15 @@ import { NextFunction, Request, Response } from 'express';
 import energyEndpoints from '../src/data/cdr-energy-endpoints.json';
 import bankingEndpoints from '../src/data/cdr-banking-endpoints.json'
 import { EndpointConfig } from '../src/models/endpoint-config';
-import { userHasAuthorisedForAccount, getEndpoint, scopeForRequestIsValid } from '../src/cdr-utils';
-import { ResponseErrorListV2 } from 'consumer-data-standards/common';
+import { userHasAuthorisedForAccount, getEndpoint, scopeForRequestIsValid, buildErrorMessage, paginateData } from '../src/cdr-utils';
+import { MetaError, ResponseErrorListV2 } from 'consumer-data-standards/common';
 import { CdrUser } from '../src/models/user';
 import { DsbEndpoint } from '../src/models/dsb-endpoint-entity';
 import commonEndpoints from '../src/data/cdr-common-endpoints.json';
-import { CdrConfig } from '..';
+import { CdrConfig, getLinksPaginated } from '..';
+import { DsbStandardError } from '../src/error-messsage-defintions';
+import { EnergyBillingTransaction } from 'consumer-data-standards/energy';
+import { BankingBalance } from 'consumer-data-standards/banking';
 
 describe('Utility functions', () => {
     let mockRequest: Partial<Request>;
@@ -683,4 +686,246 @@ describe('Utility functions', () => {
         let ep = getEndpoint(mockRequest as Request, config);
         expect(ep).toBeNull();
     });
+
+    test('Create standard error message - New list', async() => {
+        const errorDetail: string = "TrxId 123456";
+        const meta: MetaError = {
+            urn: "Additional data For Error"
+        }
+        let errorList: ResponseErrorListV2 = buildErrorMessage(DsbStandardError.MISSING_REQUIRED_FIELD, errorDetail, undefined, meta);
+
+        expect(errorList.errors.length).toBe(1); 
+        expect(errorList.errors[0].detail).toBe(errorDetail);
+        expect(errorList.errors[0].meta).toEqual(meta);
+        expect(errorList.errors[0].code).toBe("urn:au-cds:error:cds-all:Field/Missing")       
+    })
+
+    test('Create standard error message - Existing list', async() => {
+        const errorDetail: string = "TrxId 123456";
+        const meta: MetaError = {
+            urn: "Additional data For Error"
+        }
+        let errorList: ResponseErrorListV2 = {
+            errors: [
+                {
+                    title: "Invalid Service Point",
+                    code: "urn:au-cds:error:cds-energy:Authorisation/InvalidServicePoint",
+                    detail: "5468999111",
+                    meta: {
+                        urn: "Some urn"
+                    }
+                }
+            ]
+        }
+        errorList = buildErrorMessage(DsbStandardError.MISSING_REQUIRED_FIELD, errorDetail, errorList, meta);
+
+        expect(errorList.errors.length).toBe(2);      
+    }) 
+
+    test('Pagination - Paginate multiple pages', async() => {
+        let data: BankingBalance[] = [
+            {
+                accountId: "12345",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "abcdfre",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "23456",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "67856",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "95467",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            }
+
+        ]
+        let query:any = {
+           "page-size": 3,
+           "page": 2
+        }
+        let paginatedData = paginateData(data, query)
+        expect(paginatedData.length).toBe(2);      
+    }) 
+
+    test('Pagination - No pagination query params uses default', async() => {
+        let data: BankingBalance[] = [
+            {
+                accountId: "12345",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "abcdfre",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "23456",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "67856",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "95467",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            }
+
+        ]
+        let query:any = {
+           "category": "CREDIT_CARD"
+        }
+        let paginatedData = paginateData(data, query)
+        expect(paginatedData.length).toBe(5);      
+    }) 
+
+    test('Pagination - Error in query paramater', async() => {
+        let data: BankingBalance[] = [
+            {
+                accountId: "12345",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "abcdfre",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "23456",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "67856",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "95467",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            }
+
+        ]
+        let query:any = {
+           "page-size": "ert",
+           "page": 2
+        }
+        let pagData = paginateData(data, query) as ResponseErrorListV2;
+        expect(pagData.errors[0].code).toBe("urn:au-cds:error:cds-all:Field/Invalid")    
+    }) 
+
+    test('Pagination - Exeeds maximum page-size', async() => {
+        let data: BankingBalance[] = [
+            {
+                accountId: "12345",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "abcdfre",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "23456",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "67856",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "95467",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            }
+
+        ]
+        let query:any = {
+           "page": 2,
+           "page-size": 1001
+        }
+        let pagData = paginateData(data, query) as ResponseErrorListV2;
+        expect(pagData.errors[0].code).toBe("urn:au-cds:error:cds-all:Field/InvalidPageSize")    
+    }) 
+
+    test('Pagination - Invalid page requested', async() => {
+        let data: BankingBalance[] = [
+            {
+                accountId: "12345",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "abcdfre",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "23456",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "67856",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            },
+            {
+                accountId: "95467",
+                currentBalance: "100.00",
+                availableBalance: "500"
+            }
+
+        ]
+        let query:any = {
+           "page": 5,
+           "page-size": 2
+        }
+        let pagData = paginateData(data, query) as ResponseErrorListV2;
+        expect(pagData.errors[0].code).toBe("urn:au-cds:error:cds-all:Field/InvalidPage")    
+    }) 
+
+    test('Links - Correct links are returned', async() => {
+        let mockQuery:any = {
+           "page": 4,
+           "page-size": 2
+        }
+        let mockRequestObject: any = {
+            query: mockQuery,
+            host: "www.dsb.gov.au",
+            protocol: "https",
+            originalUrl:  "/cds-au/v1/energy/plans?category=ALL&page=4&page-size=2",
+            get(st: string) { 
+                return this[st]
+            }
+        }
+
+        let linkData = getLinksPaginated(mockRequestObject, 1000)
+        expect(linkData.self).toBe("https://www.dsb.gov.au/cds-au/v1/energy/plans?category=ALL&page=4&page-size=2");
+        expect(linkData.next).toBe("https://www.dsb.gov.au/cds-au/v1/energy/plans?category=ALL&page=5&page-size=2"); 
+        expect(linkData.prev).toBe("https://www.dsb.gov.au/cds-au/v1/energy/plans?category=ALL&page=3&page-size=2");
+        expect(linkData.first).toBe("https://www.dsb.gov.au/cds-au/v1/energy/plans?category=ALL&page=1&page-size=2");
+        expect(linkData.last).toBe("https://www.dsb.gov.au/cds-au/v1/energy/plans?category=ALL&page=500&page-size=2");      
+    }) 
 });

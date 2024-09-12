@@ -6,6 +6,8 @@ import { CdrUser } from '../src/models/user';
 import { Request, Response, NextFunction } from 'express';
 import { cdrEndpointValidator } from '../src/cdr-endpoint-validator';
 import { ResponseErrorListV2 } from 'consumer-data-standards/energy';
+import { buildErrorMessage } from '../src/cdr-utils';
+import { DsbStandardError } from '../src/error-messsage-defintions';
 
 describe('Endpoint validation middleware', () => {
     let mockRequest: Partial<Request>;
@@ -79,13 +81,7 @@ describe('Endpoint validation middleware', () => {
 
             endpoints: endpoints
         }
-        let returnedErrors: ResponseErrorListV2 = {
-            errors: [ {
-                code: 'urn:au-cds:error:cds-all:Resource/NotFound',
-                title: 'NotFound',
-                detail: 'This endpoint is not a CDR endpoint'
-            }]
-        };
+        let returnedErrors: any = buildErrorMessage(DsbStandardError.RESOURCE_NOT_FOUND, 'This endpoint is not a CDR endpoint')
         let auth = cdrEndpointValidator(config);
         auth(mockRequest as Request, mockResponse as Response, nextFunction as NextFunction);
         expect(mockStatus.json).toBeCalledWith(returnedErrors);
@@ -108,13 +104,7 @@ describe('Endpoint validation middleware', () => {
 
             endpoints: endpoints
         }
-        let returnedErrors: ResponseErrorListV2 = {
-            errors: [ {
-                code: 'urn:au-cds:error:cds-all:Resource/NotImplemented',
-                title: 'NotImplemented',
-                detail: 'This endpoint has not been implemented'
-            }]
-        };
+        let returnedErrors: any = buildErrorMessage(DsbStandardError.RESOURCE_NOT_IMPLEMENTED, 'This endpoint has not been implemented')
         let auth = cdrEndpointValidator(config);
         auth(mockRequest as Request, mockResponse as Response, nextFunction as NextFunction);
         expect(mockStatus.json).toBeCalledWith(returnedErrors);
@@ -158,13 +148,7 @@ describe('Endpoint validation middleware', () => {
             endpoints: endpoints,
             specifiedEndpointsOnly: true
         }
-        let returnedErrors: ResponseErrorListV2 = {
-            errors: [ {
-                code: 'urn:au-cds:error:cds-all:Resource/NotImplemented',
-                title: 'NotImplemented',
-                detail: 'This endpoint has not been implemented'
-            }]
-        };
+        let returnedErrors: any = buildErrorMessage(DsbStandardError.RESOURCE_NOT_IMPLEMENTED, 'This endpoint has not been implemented')
         let auth = cdrEndpointValidator(config);
         auth(mockRequest as Request, mockResponse as Response, nextFunction as NextFunction);
         expect(mockStatus.json).toBeCalledWith(returnedErrors);
@@ -187,13 +171,8 @@ describe('Endpoint validation middleware', () => {
             endpoints: endpoints,
             specifiedEndpointsOnly: true
         }
-        let returnedErrors: ResponseErrorListV2 = {
-            errors: [ {
-                code: 'urn:au-cds:error:cds-all:Resource/NotImplemented',
-                title: 'NotImplemented',
-                detail: 'This endpoint has not been implemented'
-            }]
-        };
+        let returnedErrors: any = buildErrorMessage(DsbStandardError.RESOURCE_NOT_IMPLEMENTED, 'This endpoint has not been implemented')
+
         let auth = cdrEndpointValidator(config);
         auth(mockRequest as Request, mockResponse as Response, nextFunction as NextFunction);
         expect(mockStatus.json).toBeCalledWith(returnedErrors);
@@ -216,13 +195,7 @@ describe('Endpoint validation middleware', () => {
             endpoints: endpoints,
             specifiedEndpointsOnly: true
         }
-        let returnedErrors: ResponseErrorListV2 = {
-            errors: [ {
-                code: 'urn:au-cds:error:cds-all:Resource/NotFound',
-                title: 'NotFound',
-                detail: 'This endpoint is not a CDR endpoint'
-            }]
-        };
+        let returnedErrors: any = buildErrorMessage(DsbStandardError.RESOURCE_NOT_FOUND, 'This endpoint is not a CDR endpoint')
         let auth = cdrEndpointValidator(config);
         auth(mockRequest as Request, mockResponse as Response, nextFunction as NextFunction);
         expect(mockStatus.json).toBeCalledWith(returnedErrors);
@@ -266,13 +239,7 @@ describe('Endpoint validation middleware', () => {
             endpoints: endpoints,
             basePath: "/prod-data"
         }
-        let returnedErrors: ResponseErrorListV2 = {
-            errors: [ {
-                code: 'urn:au-cds:error:cds-all:Resource/NotFound',
-                title: 'NotFound',
-                detail: 'This endpoint is not a CDR endpoint'
-            }]
-        };
+        let returnedErrors: any = buildErrorMessage(DsbStandardError.RESOURCE_NOT_FOUND, 'This endpoint is not a CDR endpoint')
         let auth = cdrEndpointValidator(config);
         auth(mockRequest as Request, mockResponse as Response, nextFunction as NextFunction);
         expect(mockStatus.json).toBeCalledWith(returnedErrors);
