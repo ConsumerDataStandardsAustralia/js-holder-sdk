@@ -2,8 +2,8 @@
     {
         "requestType": "GET",
         "requestPath": "/banking/accounts",
-        "minSupportedVersion": 1,
-        "maxSupportedVersion": 1
+        "minSupportedVersion": 2,
+        "maxSupportedVersion": 2
     },
     {
         "requestType": "GET",
@@ -38,8 +38,8 @@
     {
         "requestType": "GET",
         "requestPath": "/banking/accounts/{accountId}/transactions/{transactionId}",
-        "minSupportedVersion": 1,
-        "maxSupportedVersion": 1
+        "minSupportedVersion": 2,
+        "maxSupportedVersion": 2
     },
     {
         "requestType": "GET",
@@ -98,8 +98,8 @@
     {
         "requestType": "GET",
         "requestPath": "/banking/products/{productId}",
-        "minSupportedVersion": 4,
-        "maxSupportedVersion": 4
+        "minSupportedVersion": 5,
+        "maxSupportedVersion": 5
     }                 
   
 ]

@@ -22,7 +22,7 @@
   "author": "Tomas Schier",
   "license": "ISC",
   "devDependencies": {
-    "@types/consumer-data-standards": "^7.1.4",
+    "@types/consumer-data-standards": "^7.3.0",
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.12",
     "@types/uuid": "^8.3.1",
