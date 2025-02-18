@@ -8,8 +8,8 @@
     {
         "requestType": "GET",
         "requestPath": "/energy/plans/{planId}",
-        "minSupportedVersion": 2,
-        "maxSupportedVersion": 2
+        "minSupportedVersion": 3,
+        "maxSupportedVersion": 3
     },
     {
         "requestType": "GET",
@@ -68,8 +68,8 @@
     {
         "requestType": "GET",
         "requestPath": "/energy/accounts/{accountId}",
-        "minSupportedVersion": 3,
-        "maxSupportedVersion": 3
+        "minSupportedVersion": 4,
+        "maxSupportedVersion": 4
     },
     {
         "requestType": "GET",
@@ -122,19 +122,19 @@
     {
         "requestType": "GET",
         "requestPath": "/energy/accounts/{accountId}/billing",
-        "minSupportedVersion": 2,
-        "maxSupportedVersion": 2
+        "minSupportedVersion": 3,
+        "maxSupportedVersion": 3
     },
     {
         "requestType": "GET",
         "requestPath": "/energy/accounts/billing",
-        "minSupportedVersion": 2,
-        "maxSupportedVersion": 2
+        "minSupportedVersion": 3,
+        "maxSupportedVersion": 3
     },
     {
         "requestType": "POST",
         "requestPath": "/energy/accounts/billing",
-        "minSupportedVersion": 2,
-        "maxSupportedVersion": 2
+        "minSupportedVersion": 3,
+        "maxSupportedVersion": 3
     }                    
 ]
