@@ -186,7 +186,7 @@ function findMinSupported(req: Request, options: CdrConfig): number {
         const endpoints = options.endpoints;
         var idx = endpoints.findIndex(x => x.requestPath == dsbEndpoint.requestPath);
         var ep = endpoints[idx];
-        return ep.minSupportedVersion;
+        return ep?.minSupportedVersion as number;
     }
     catch (e) {
         return 1;
@@ -202,7 +202,7 @@ function findMaxSupported(req: Request, options: CdrConfig): number {
         const endpoints = options.endpoints;
         var idx = endpoints.findIndex(x => x.requestPath == dsbEndpoint.requestPath);
         let ep = endpoints[idx];
-        return ep.maxSupportedVersion;
+        return ep?.maxSupportedVersion as number;
     } catch(e) {
         return 1;
     }
