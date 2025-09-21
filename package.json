@@ -1,6 +1,6 @@
 {
   "name": "@cds-au/holder-sdk",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "NodeJS middleware to handle error generation in line with Australian Consumer Data Standards technical specifications",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,14 +15,13 @@
     "dev": "nodemon"
   },
   "keywords": [
-    "xp-solutions",
     "nodejs",
     "typescript"
   ],
   "author": "Tomas Schier",
   "license": "ISC",
   "devDependencies": {
-    "@types/consumer-data-standards": "^7.3.0",
+    "@types/consumer-data-standards": "^7.4.0",
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.12",
     "@types/uuid": "^8.3.1",

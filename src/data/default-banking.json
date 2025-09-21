@@ -3,13 +3,13 @@
         "requestType": "GET",
         "requestPath": "/banking/accounts",
         "minSupportedVersion": 2,
-        "maxSupportedVersion": 2
+        "maxSupportedVersion": 3
     },
     {
         "requestType": "GET",
         "requestPath": "/banking/accounts/balances",
         "minSupportedVersion": 1,
-        "maxSupportedVersion": 1
+        "maxSupportedVersion": 2
     },
     {
         "requestType": "POST",
@@ -27,19 +27,19 @@
         "requestType": "GET",
         "requestPath": "/banking/accounts/{accountId}",
         "minSupportedVersion": 3,
-        "maxSupportedVersion": 3
+        "maxSupportedVersion": 5
     },
     {
         "requestType": "GET",
         "requestPath": "/banking/accounts/{accountId}/transactions",
         "minSupportedVersion": 1,
-        "maxSupportedVersion": 1
+        "maxSupportedVersion": 2
     },
     {
         "requestType": "GET",
         "requestPath": "/banking/accounts/{accountId}/transactions/{transactionId}",
         "minSupportedVersion": 2,
-        "maxSupportedVersion": 2
+        "maxSupportedVersion": 3
     },
     {
         "requestType": "GET",
@@ -51,7 +51,7 @@
         "requestType": "GET",
         "requestPath": "/banking/accounts/direct-debits",
         "minSupportedVersion": 1,
-        "maxSupportedVersion": 1
+        "maxSupportedVersion": 2
     } ,
     {
         "requestType": "POST",
@@ -69,7 +69,7 @@
         "requestType": "GET",
         "requestPath": "/banking/payments/scheduled",
         "minSupportedVersion": 2,
-        "maxSupportedVersion": 2
+        "maxSupportedVersion": 3
     },  
     {
         "requestType": "POST",
@@ -93,13 +93,25 @@
         "requestType": "GET",
         "requestPath": "/banking/products",
         "minSupportedVersion": 3,
-        "maxSupportedVersion": 3
+        "maxSupportedVersion": 5
     } ,
     {
         "requestType": "GET",
         "requestPath": "/banking/products/{productId}",
-        "minSupportedVersion": 5,
-        "maxSupportedVersion": 5
-    }                 
+        "minSupportedVersion": 4,
+        "maxSupportedVersion": 7
+    },
+    {
+        "requestType": "GET",
+        "requestPath": "/banking/accounts/{accountId}/payments/plans",
+        "minSupportedVersion": 1,
+        "maxSupportedVersion": 1
+    } ,
+    {
+        "requestType": "GET",
+        "requestPath": "/banking/accounts/payments/plans",
+        "minSupportedVersion": 1,
+        "maxSupportedVersion": 1
+    }                       
   
 ]

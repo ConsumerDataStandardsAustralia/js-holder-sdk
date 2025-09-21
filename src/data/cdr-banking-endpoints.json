@@ -168,5 +168,25 @@
         "requiresXv": true,
         "requiresCDSArrangementID": false,
         "requiresXFAPI": true
-    }                 
+    },
+    {
+        "requestType": "GET",
+        "requestPath": "/banking/accounts/payments/plans",
+        "requiresXFAPIAuthdate": true,
+        "authScopesRequired": "bank:regular_payments:read",
+        "requiresCDSClientHeader": false,
+        "requiresXv": true,
+        "requiresCDSArrangementID": false,
+        "requiresXFAPI": true
+    }  ,
+        {
+        "requestType": "GET",
+        "requestPath": "/banking/accounts/{accountId}/payments/plans",
+        "requiresXFAPIAuthdate": true,
+        "authScopesRequired": "bank:regular_payments:read",
+        "requiresCDSClientHeader": false,
+        "requiresXv": true,
+        "requiresCDSArrangementID": false,
+        "requiresXFAPI": true
+    }                     
 ]
