@@ -9,7 +9,6 @@ import { DsbEndpoint } from '../src/models/dsb-endpoint-entity';
 import commonEndpoints from '../src/data/cdr-common-endpoints.json';
 import { CdrConfig, getLinksPaginated } from '..';
 import { DsbStandardError } from '../src/error-messsage-defintions';
-import { EnergyBillingTransaction } from 'consumer-data-standards/energy';
 import { BankingBalance } from 'consumer-data-standards/banking';
 
 describe('Utility functions', () => {
